@@ -7,7 +7,8 @@ from rdkit import Chem
 from rdkit import RDLogger, DataStructs
 from rdkit.Chem import AllChem
 from rdkit.ML.Descriptors import MoleculeDescriptors
-from scipy import histogram
+# from scipy import histogram
+from numpy import histogram  # NEW
 from scipy.stats import entropy, gaussian_kde
 
 from guacamol.utils.data import remove_duplicates
