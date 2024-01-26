@@ -1,0 +1,9 @@
+joblib>=0.12.5
+numpy>=1.15.2
+scipy>=1.1.0
+tqdm>=4.26.0
+FCD>=1.1
+rdkit-pypi>=2021.9.2.1
+
+[rdkit]
+rdkit>=2018.09.1.0
