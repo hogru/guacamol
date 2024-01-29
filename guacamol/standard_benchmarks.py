@@ -1,4 +1,5 @@
 from rdkit import Chem
+from typing import Optional
 
 from guacamol.common_scoring_functions import TanimotoScoringFunction, RdkitScoringFunction, CNS_MPO_ScoringFunction, \
     IsomerScoringFunction, SMARTSScoringFunction
@@ -272,9 +273,13 @@ def kldiv_benchmark(training_set_file: str, number_samples: int) -> Distribution
     return KLDivBenchmark(number_samples=number_samples, training_set=smiles_list)
 
 
-def frechet_benchmark(training_set_file: str, number_samples: int) -> DistributionLearningBenchmark:
+def frechet_benchmark(training_set_file: str,
+                      number_generated_samples: int,
+                      number_reference_samples: Optional[int] = None) -> DistributionLearningBenchmark:
     smiles_list = [s.strip() for s in open(training_set_file).readlines()]
-    return FrechetBenchmark(training_set=smiles_list, sample_size=number_samples)
+    return FrechetBenchmark(training_set=smiles_list,
+                            number_generated_samples=number_generated_samples,
+                            number_reference_samples=number_reference_samples)
 
 
 def perindopril_rings() -> GoalDirectedBenchmark:

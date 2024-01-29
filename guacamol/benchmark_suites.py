@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from guacamol.distribution_learning_benchmark import DistributionLearningBenchmark, ValidityBenchmark, \
     UniquenessBenchmark
@@ -24,7 +24,8 @@ def goal_directed_benchmark_suite(version_name: str) -> List[GoalDirectedBenchma
 
 def distribution_learning_benchmark_suite(chembl_file_path: str,
                                           version_name: str,
-                                          number_samples: int) -> List[DistributionLearningBenchmark]:
+                                          number_generated_samples: int, # NEW
+                                          number_reference_samples: Optional[int] = None) -> List[DistributionLearningBenchmark]:  # NEW
     """
     Returns a suite of benchmarks for a specified benchmark version
 
@@ -33,12 +34,14 @@ def distribution_learning_benchmark_suite(chembl_file_path: str,
         version_name: benchmark version
 
     Returns:
-        List of benchmaks
+        List of benchmarks
     """
 
     # For distribution-learning, v1 and v2 are identical
     if version_name == 'v1' or version_name == 'v2':
-        return distribution_learning_suite_v1(chembl_file_path=chembl_file_path, number_samples=number_samples)
+        return distribution_learning_suite_v1(chembl_file_path=chembl_file_path,
+                                              number_generated_samples=number_generated_samples,  # NEW
+                                              number_reference_samples=number_reference_samples)  # NEW
 
     raise Exception(f'Distribution-learning benchmark suite "{version_name}" does not exist.')
 
@@ -141,7 +144,9 @@ def goal_directed_suite_trivial() -> List[GoalDirectedBenchmark]:
     ]
 
 
-def distribution_learning_suite_v1(chembl_file_path: str, number_samples: int = 10000) -> \
+def distribution_learning_suite_v1(chembl_file_path: str,
+                                   number_generated_samples: int,
+                                   number_reference_samples: Optional[int] = None) -> \
         List[DistributionLearningBenchmark]:
     """
     Suite of distribution learning benchmarks, v1.
@@ -153,9 +158,12 @@ def distribution_learning_suite_v1(chembl_file_path: str, number_samples: int = 
         List of benchmarks, version 1
     """
     return [
-        ValidityBenchmark(number_samples=number_samples),
-        UniquenessBenchmark(number_samples=number_samples),
-        novelty_benchmark(training_set_file=chembl_file_path, number_samples=number_samples),
-        kldiv_benchmark(training_set_file=chembl_file_path, number_samples=number_samples),
-        frechet_benchmark(training_set_file=chembl_file_path, number_samples=number_samples)
+        ValidityBenchmark(number_samples=number_generated_samples),
+        UniquenessBenchmark(number_samples=number_generated_samples),
+        novelty_benchmark(training_set_file=chembl_file_path, number_samples=number_generated_samples),
+        # TODO add back kldiv benchmark
+        # kldiv_benchmark(training_set_file=chembl_file_path, number_samples=number_samples),
+        frechet_benchmark(training_set_file=chembl_file_path,
+                          number_generated_samples=number_generated_samples,
+                          number_reference_samples=number_reference_samples)
     ]

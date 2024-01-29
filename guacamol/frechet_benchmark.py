@@ -3,7 +3,7 @@ import os
 import pkgutil
 import tempfile
 import time
-from typing import List
+from typing import List, Optional
 
 import fcd
 import numpy as np
@@ -25,9 +25,11 @@ class FrechetBenchmark(DistributionLearningBenchmark):
     """
 
     def __init__(self, training_set: List[str],
+                 number_generated_samples: int,  # NEW
+                 number_reference_samples: Optional[int] = None,  # NEW
                  # chemnet_model_filename='ChemNet_v0.13_pretrained.h5',
-                 chemnet_model_filename='ChemNet_v0.13_pretrained.pt',
-                 sample_size=10000) -> None:
+                 chemnet_model_filename='ChemNet_v0.13_pretrained.pt') -> None:  # NEW
+                 # sample_size=10000) -> None:
         """
         Args:
             training_set: molecules from the training set
@@ -36,19 +38,21 @@ class FrechetBenchmark(DistributionLearningBenchmark):
             sample_size: how many molecules to generate the distribution statistics from (both reference data and model)
         """
         self.chemnet_model_filename = chemnet_model_filename
-        self.sample_size = sample_size
-        super().__init__(name='Frechet ChemNet Distance', number_samples=self.sample_size)
+        self.generated_sample_size = number_generated_samples  # NEW
+        # Allow for "all" samples, i.e. len(training_set)
+        self.reference_sample_size = number_reference_samples  # NEW
+        super().__init__(name='Frechet ChemNet Distance', number_samples=self.reference_sample_size)  # NEW
 
-        self.reference_molecules = get_random_subset(training_set, self.sample_size, seed=42)
+        self.reference_molecules = get_random_subset(training_set, self.reference_sample_size, seed=42)  # NEW
 
     def assess_model(self, model: DistributionMatchingGenerator) -> DistributionLearningBenchmarkResult:
         chemnet = self._load_chemnet()
 
         start_time = time.time()
-        generated_molecules = sample_valid_molecules(model=model, number_molecules=self.number_samples)
+        generated_molecules = sample_valid_molecules(model=model, number_molecules=self.generated_sample_size)
         end_time = time.time()
 
-        if len(generated_molecules) != self.number_samples:
+        if len(generated_molecules) != self.generated_sample_size:
             logger.warning('The model could not generate enough valid molecules.')
 
         mu_ref, cov_ref = self._calculate_distribution_statistics(chemnet, self.reference_molecules)

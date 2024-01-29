@@ -2,7 +2,7 @@ import datetime
 import json
 import logging
 from collections import OrderedDict
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional, Final
 
 import guacamol
 from guacamol.distribution_learning_benchmark import DistributionLearningBenchmark, DistributionLearningBenchmarkResult
@@ -10,12 +10,16 @@ from guacamol.distribution_matching_generator import DistributionMatchingGenerat
 from guacamol.benchmark_suites import distribution_learning_benchmark_suite
 from guacamol.utils.data import get_time_string
 
+DEFAULT_NUM_GEN_MOLECULES: Final[int] = 10_000  # NEW
+
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
 
 def assess_distribution_learning(model: DistributionMatchingGenerator,
                                  chembl_training_file: str,
+                                 number_generated_samples: int = DEFAULT_NUM_GEN_MOLECULES,  # NEW
+                                 number_reference_samples: Optional[int] = None,  # NEW
                                  json_output_file='output_distribution_learning.json',
                                  benchmark_version='v1') -> None:
     """
@@ -31,14 +35,16 @@ def assess_distribution_learning(model: DistributionMatchingGenerator,
                                   chembl_training_file=chembl_training_file,
                                   json_output_file=json_output_file,
                                   benchmark_version=benchmark_version,
-                                  number_samples=10000)
+                                  number_generated_samples=number_generated_samples,  # NEW
+                                  number_reference_samples=number_reference_samples)  # NEW
 
 
 def _assess_distribution_learning(model: DistributionMatchingGenerator,
                                   chembl_training_file: str,
                                   json_output_file: str,
                                   benchmark_version: str,
-                                  number_samples: int) -> None:
+                                  number_generated_samples: int,  # NEW
+                                  number_reference_samples: Optional[int] = None) -> None:  # NEW
     """
     Internal equivalent to assess_distribution_learning, but allows for a flexible number of samples.
     To call directly only for testing.
@@ -46,12 +52,14 @@ def _assess_distribution_learning(model: DistributionMatchingGenerator,
     logger.info(f'Benchmarking distribution learning, version {benchmark_version}')
     benchmarks = distribution_learning_benchmark_suite(chembl_file_path=chembl_training_file,
                                                        version_name=benchmark_version,
-                                                       number_samples=number_samples)
+                                                       number_generated_samples=number_generated_samples,
+                                                       number_reference_samples=number_reference_samples)  # NEW
 
     results = _evaluate_distribution_learning_benchmarks(model=model, benchmarks=benchmarks)
 
     benchmark_results: Dict[str, Any] = OrderedDict()
-    benchmark_results['guacamol_version'] = guacamol.__version__
+    # TODO Replace with guacamol.__guacamol_version__ when available
+    # benchmark_results['guacamol_version'] = guacamol.__version__
     benchmark_results['benchmark_suite_version'] = benchmark_version
     benchmark_results['timestamp'] = get_time_string()
     # standard json encoder can't encode numpy arrays
