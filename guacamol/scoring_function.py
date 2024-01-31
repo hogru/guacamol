@@ -88,7 +88,7 @@ class MoleculewiseScoringFunction(ScoringFunction):
         except InvalidMolecule:
             return self.corrupt_score
         except Exception:
-            logger.warning(f'Unknown exception thrown during scoring of {smiles}')
+            logger.warning(f"Unknown exception thrown during scoring of {smiles}")
             return self.corrupt_score
 
     def score_list(self, smiles_list: List[str]) -> List[float]:
@@ -127,9 +127,10 @@ class BatchScoringFunction(ScoringFunction):
     def score_list(self, smiles_list: List[str]) -> List[float]:
         raw_scores = self.raw_score_list(smiles_list)
 
-        scores = [self.corrupt_score if raw_score is None
-                  else self.modify_score(raw_score)
-                  for raw_score in raw_scores]
+        scores = [
+            self.corrupt_score if raw_score is None else self.modify_score(raw_score)
+            for raw_score in raw_scores
+        ]
 
         return scores
 
