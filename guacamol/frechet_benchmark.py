@@ -55,9 +55,12 @@ class FrechetBenchmark(DistributionLearningBenchmark):
         if len(generated_molecules) != self.generated_sample_size:
             logger.warning('The model could not generate enough valid molecules.')
 
+        logger.info("  Calculate distribution statistics for reference molecules...")
         mu_ref, cov_ref = self._calculate_distribution_statistics(chemnet, self.reference_molecules)
+        logger.info("  Calculate distribution statistics for generated molecules...")
         mu, cov = self._calculate_distribution_statistics(chemnet, generated_molecules)
 
+        logger.info("  Calculate FCD...")
         FCD = fcd.calculate_frechet_distance(mu1=mu_ref, mu2=mu,
                                              sigma1=cov_ref, sigma2=cov)
         score = np.exp(-0.2 * FCD)
@@ -92,12 +95,15 @@ class FrechetBenchmark(DistributionLearningBenchmark):
         with open(model_path, 'wb') as f:
             f.write(model_bytes)
 
-        logger.info(f'Saved ChemNet model to \'{model_path}\'')
+        logger.info(f'  Saved ChemNet model to \'{model_path}\'')
 
         return fcd.load_ref_model(model_path)
 
     def _calculate_distribution_statistics(self, model, molecules: List[str]):
+        logger.info("    Canonicalize SMILES...")
         sample_std = fcd.canonical_smiles(molecules)
+
+        logger.info("    Calculate predictions...")
         gen_mol_act = fcd.get_predictions(model, sample_std)
 
         mu = np.mean(gen_mol_act, axis=0)
