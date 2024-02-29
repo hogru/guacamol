@@ -9,10 +9,9 @@ import fcd
 import numpy as np
 
 from guacamol.distribution_learning_benchmark import (
-    DistributionLearningBenchmark,
-    DistributionLearningBenchmarkResult,
-)
-from guacamol.distribution_matching_generator import DistributionMatchingGenerator
+    DistributionLearningBenchmark, DistributionLearningBenchmarkResult)
+from guacamol.distribution_matching_generator import \
+    DistributionMatchingGenerator
 from guacamol.utils.data import get_random_subset
 from guacamol.utils.sampling_helpers import sample_valid_molecules
 
